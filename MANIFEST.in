@@ -1,0 +1,6 @@
+include README.rst
+include LICENSE*
+
+recursive-include helpdesk/static/helpdesk *
+recursive-include helpdesk/templates *
+recursive-include helpdesk/fixtures *.json

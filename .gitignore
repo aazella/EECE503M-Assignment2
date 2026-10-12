@@ -1,0 +1,50 @@
+*.pyc
+__pycache__/
+.eggs/
+/dist/
+*.egg-info
+.coverage
+.project
+.pydevproject
+.directory
+*.swp
+.idea
+.venv
+uv.lock
+
+# uploaded attachments
+helpdesk/attachments/
+standalone/media/
+
+# Devbox
+.devbox
+devbox.lock
+devbox.json
+
+
+# === Yarn core files ===
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+
+# If you use Yarn node_modules linker
+node_modules/
+
+# Yarn state files
+.pnp.*
+
+# === Log / lock / cache ===
+yarn-error.log
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# === vendored front-end files, rebuilt by "make static-vendor" ===
+src/helpdesk/static/helpdesk/vendor/*
+
+# Development files
+.vscode/
+.cursor/
+.devcontainer/

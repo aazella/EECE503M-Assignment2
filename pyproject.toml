@@ -1,0 +1,164 @@
+[project]
+name = "meridian-servicedesk"
+version = "1.4.0"
+description = "Meridian Service Desk - a Django ticket tracker"
+requires-python = ">=3.10"
+readme = "README.rst"
+license = {text = "BSD-3-Clause"}
+keywords = ["django", "service desk", "tickets", "incidents", "cases", "support"]
+packages = [
+    { include="helpdesk", from="." },
+]
+dependencies = [
+    "django>=5.2",
+    # Kept as a hard dependency on purpose: it activates automatically when listed
+    # in INSTALLED_APPS, so a copy that follows our
+    # own instructions would refuse to start without it.
+    "django-cleanup",
+    "email-reply-parser",
+    "markdown",
+    "beautifulsoup4",
+    "nh3",
+    "djangorestframework",
+    "django-model-utils",
+    "oauthlib",
+    "requests-oauthlib",
+    "requests",
+]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 5.2",
+    "Framework :: Django :: 6.0",
+    "Intended Audience :: Customer Service",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Topic :: Office/Business",
+    "Topic :: Software Development :: Bug Tracking",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.optional-dependencies]
+teams = [
+    "pinax_teams",
+]
+# Poll mailboxes with a periodic celery task instead of cron.
+# django-celery-beat is what actually schedules it.
+celery = [
+    "celery",
+    "django-celery-beat",
+]
+# Check incoming ticket submissions against Akismet.
+# helpdesk.lib.text_is_spam already degrades to "not spam" when this is absent.
+spam = [
+    "akismet",
+]
+# Everything above, for anyone who wants what earlier releases installed by
+# default.
+all = [
+    "meridian-servicedesk[celery,spam,teams]",
+]
+
+[dependency-groups]
+teams = [
+    "pinax-invitations>=8.0.0",
+    "pinax-teams>=3.0.0",
+]
+test = [
+    "argparse>=1.4.0",
+    "coverage>=7.16.0",
+    "factory-boy>=3.3.3",
+    "faker>=37.11.0",
+    "freezegun>=1.5.5",
+    "isort>=6.0.1",
+    "mock>=5.2.0",
+    "numpy>=2.0.2",
+    "pbr>=7.0.0",
+    "pillow>=11.3.0",
+    "pysocks>=1.7.1",
+]
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.build]
+package-dir = "src"
+includes = ["src", "src/helpdesk"]
+excludes = [
+    ".venv",
+    "tests",
+]
+
+[tool.ruff]
+exclude = [".venv", "migrations", "src/helpdesk/static", "src/helpdesk/template*"]
+
+[tool.djlint]
+blank_line_before_tag="load,extends"
+blank_line_after_tag="load,extends"
+close_void_tags=true
+custom_blocks="toc,example"
+custom_html="mjml"
+exclude=".venv,venv,.tox,.eggs,.git,static"
+extend_exclude=".custom"
+format_attribute_template_tags=true
+format_css=true
+format_js=true
+ignore_blocks="raw,example"
+indent=2
+max_attribute_length=120
+max_line_length=120
+profile="django"
+preserve_blank_lines=true
+use_gitignore=true
+
+[tool.djlint.css]
+indent_size=2
+
+[tool.djlint.js]
+indent_size=2
+
+[tool.coverage.run]
+branch = true
+source = ["src/helpdesk"]
+dynamic_context = "test_function"
+omit = [
+    "*/helpdesk/migrations/*",
+    # omit single files
+    # "main/asgi.py",
+]
+
+[tool.coverage.report]
+ignore_errors = true
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    # Have to re-enable the standard pragma
+    "pragma: no cover",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "if __name__==.__main__.:",
+]
+
+[tool.coverage.html]
+show_contexts = true
+

@@ -1,0 +1,35 @@
+# Keep LF on every checkout, including Windows.
+#
+# Git for Windows defaults to core.autocrlf=true, which rewrites tracked text
+# files to CRLF when it checks them out. lab/entrypoint.sh is bind-mounted into
+# the app container and run as its entrypoint, so a CR at the end of the shebang
+# line stops the container from starting. These rules override the local setting.
+* text=auto eol=lf
+
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Binary: never touch the bytes.
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.mo binary
+
+# Exempt from the LF rule above.
+#
+# E-mail fixtures are wire format. RFC 5322 puts CRLF at the end of every
+# header line, and the ticket-from-e-mail tests parse these bytes as they
+# stand, so normalising them breaks the test suite.
+*.eml -text
+
+# Vendored asset. It ships as its author released it.
+src/helpdesk/static/helpdesk/jquery.translate-debug-all.js -text

@@ -1,0 +1,15 @@
+whitenoise
+gunicorn
+psycopg2-binary
+django
+
+email-reply-parser
+markdown
+beautifulsoup4
+pinax_teams
+djangorestframework
+django-model-utils
+django-cleanup
+oauthlib
+requests_oauthlib
+requests

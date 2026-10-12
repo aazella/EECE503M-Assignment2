@@ -1,0 +1,84 @@
+# 503M lab stack:  browser -> nginx -> app -> postgres
+#
+#   docker compose -f lab/docker-compose.yml up --build
+#   then open http://127.0.0.1:5001
+#
+# Published to the host LOOPBACK ONLY. This application is deliberately
+# vulnerable and must never be reachable from a network you do not control.
+# Port 5001, not 5000: macOS AirPlay owns 5000 and answers every request itself.
+# Not 8080 either, which is Burp's own proxy.
+#
+# Explicit project name: without it Compose names the project after this file's
+# directory ("lab"), so two lab checkouts that both live in a lab/ folder share
+# one project, its containers and its volumes, and cannot run at once. Pin the
+# name here. To run a second lab beside this one, override with `-p <name>`, and
+# `docker compose -f lab/docker-compose.yml down -v` a previous one first.
+name: meridian-servicedesk
+
+volumes:
+  pgdata:
+  media:
+  static:
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5001:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - media:/srv/media:ro
+      - static:/srv/static:ro
+    depends_on:
+      - app
+      - php
+
+  # A PHP interpreter for the upload lab. The media directory is shared with it,
+  # so a request that nginx routes to this service executes the uploaded file.
+  # Nothing else in the course is PHP; this exists only so the classic
+  # upload-a-web-shell attack (file-upload lab, B1) is reproducible end to end.
+  php:
+    image: php:8.3-fpm-alpine
+    restart: unless-stopped
+    volumes:
+      - media:/srv/media:ro
+
+  app:
+    build:
+      context: ..
+      dockerfile: lab/Dockerfile
+    restart: unless-stopped
+    env_file: lab.env
+    expose:
+      - "8000"
+    # The source is mounted, not baked in, so a student edits a file and the
+    # app reloads. Fixing the code is half of every lab.
+    entrypoint: ["/lab/entrypoint.sh"]
+    volumes:
+      - ../src:/opt/meridian/src
+      # standalone/ holds the Django settings. Mounted for the same reason:
+      # the misconfiguration lab is entirely about settings, and an edit that
+      # the running application ignores teaches the wrong thing.
+      - ../standalone:/opt/meridian/standalone
+      - ./:/lab:ro
+      - media:/data/media
+      # Nested inside the mount above, so collectstatic output survives.
+      - static:/opt/meridian/standalone/static
+    depends_on:
+      - postgres
+
+  metadata:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    # No ports published: reachable by the app over the compose network,
+    # never from the host browser. This is the SSRF target.
+    volumes:
+      - ./internal:/usr/share/nginx/html:ro
+
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    env_file: lab.env
+    volumes:
+      - pgdata:/var/lib/postgresql/data

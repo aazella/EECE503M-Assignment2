@@ -1,0 +1,17 @@
+{% extends "helpdesk/base.html" %}
+{% load i18n %}
+{% block helpdesk_title %}{% translate "Preferences" %}{% endblock %}
+{% block helpdesk_body %}
+  <div class="p-3">
+    <h1>{% translate "Display Preferences" %}</h1>
+    {% if prefs %}
+      <table class="table table-sm">
+        {% for key, value in prefs.items %}
+          <tr><th>{{ key }}</th><td>{{ value }}</td></tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p class="text-body-secondary">{% translate "No saved preferences yet." %}</p>
+    {% endif %}
+  </div>
+{% endblock %}
